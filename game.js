@@ -6,7 +6,9 @@ kaboom({
     clearColor: [0,0,0,1],
   })
 
-    const MOVE_SPEED = 120
+    const MOVE_SPEED = 150
+    var CURRENT_MOVE_SPEED = MOVE_SPEED
+    const FAST_SPEED = 500
     const JUMP_FORCE = 300
     var CURRENT_JUMP_FORCE = JUMP_FORCE
     const BIG_JUMP_FORCE = 400
@@ -14,7 +16,7 @@ kaboom({
     const FALL_DEATH = 500
   
 
-  loadSprite('coin','https://i.imgur.com/0K90LnQ.png')
+  loadSprite('coin','https://i.imgur.com/fXaF7G7.png')
   loadSprite('evil-shroom','https://i.imgur.com/hxtFpBg.png')
   loadSprite('brick','https://i.imgur.com/pogC9x5.png')
   loadSprite('block','https://i.imgur.com/M6rwarW.png')
@@ -26,6 +28,8 @@ kaboom({
   loadSprite('pipe-top-right','https://i.imgur.com/hj2GK4n.png')
   loadSprite('pipe-bottom-left','https://i.imgur.com/c1cYSbt.png')
   loadSprite('pipe-bottom-right','https://i.imgur.com/nqQ79eI.png')
+  loadSprite('keys','https://i.imgur.com/h3MaVaL.png')
+  loadSprite('dollar','https://i.imgur.com/TX1Rowr.png')
 
 
   scene("game", ({level, score}) => {
@@ -33,26 +37,44 @@ kaboom({
 
       const maps = [
         [
-            '                                               ',
-            '                                               ',
-            '                                               ',
-            '                                               ',
-            '                                               ',
-            '                                               ',
-            '                                               ',
-            '                                               ',
-            '                                               ',
-            '                                               ',
-            '                                               ',
-            '                                               ',
-            '                                               ',
-            '     %   =*=%=                                 ',
-            '                            -+                 ',
-            '                     ^  ^   ()                 ',
-            '================================    ===========',
+            '                                                                                                                                                ',
+            '                                                                                                                                                ',
+            '                                                                                                                                                ',
+            '                                                                                                                                                ',
+            '                                                                                                                                                ',
+            '                                                                                                                                                ',
+            '                                                                                                                                                ',
+            '                                                                                                                                                ',
+            '                                                                                                                                                ',
+            '                                                                                                                                                ',
+            '                                                                                                                                                ',
+            '                                                          % % % % % % % % % %                                                                   ',
+            '                                                                                                                                                ',
+            '     %   =*=%=                                                                                 =%=%=%=%=%=%=@==                                 ',
+            '                                                       ==========================                                                           -+  ',
+            '                     ^  ^                                                                                                   ^     ^      ^  ()  ',
+            '================================    ================                               =============================================================',
         ],
         [
-
+            '                                                                                                                   ',
+            '                                 !     !      !      !                                                                  ',
+            '                              ==========================                                                                ',
+            '                           }                                                                                            ',
+            '                        }  }                                                                                            ',
+            '                     }  }  }                                                                                            ',
+            '                  }  }  }  }                                                                                            ',
+            '                  }  }  }  }                    ^         ^         ^           ^                                       ',
+            ' ======================================================================================                                 ',
+            '                                                                                                                        ',
+            '                                                                                                                        ',
+            '                                                                                                                        ',
+            '                                                     ! ! !    !!!!!      !    !!!!!                                     ',
+            '                                                     ! ! !      !       !!!     !                                       ',
+            '                                                     !        !!!!!    !   !    !                                       ',
+            ' ===================   =====   =====    =====     =========================================================             ',
+            '                                                                                                                        ',
+            '                                                                                                                        ',
+            '                                                                                                                        ',
         ],
       ] 
 
@@ -60,17 +82,19 @@ kaboom({
           width: 20,
           height: 20,
           '=': [sprite('block'), solid()],
-          '$': [sprite('coin'), 'coin', scale(1)],
+          '$': [sprite('coin'), 'coin', scale(0.2)],
           '%': [sprite('surprise'), solid(), 'coin-surprise'],
           '*': [sprite('surprise'), solid(), 'mushroom-surprise'],
+          '@': [sprite('surprise'), solid(), 'keys-surprise'],
           '}': [sprite('unboxed'), solid()],
           '(': [sprite('pipe-bottom-left'), solid(),scale(0.5), 'pipe'],
           ')': [sprite('pipe-bottom-right'), solid(),scale(0.5), 'pipe'],
           '-': [sprite('pipe-top-left'), solid(), scale(0.5), 'pipe'],
           '+': [sprite('pipe-top-right'), solid(), scale(0.5), 'pipe'],
-          '^': [sprite('evil-shroom'), solid(), 'danger', scale(0.5)],
+          '^': [sprite('evil-shroom'), solid(), 'danger', scale(0.5), body()],
           '#': [sprite('mushroom'),solid(), 'mushroom', body()],
-
+          '&': [sprite('keys'),solid(), 'keys', body(), scale(0.2)],
+          '!': [sprite('dollar'), solid(), 'dollar', scale(0.5)],
 
       }
 
@@ -142,7 +166,7 @@ kaboom({
 
       player.on("headbump", (obj) => {
           if(obj.is('coin-surprise')){
-              gameLevel.spawn('$', obj.gridPos.sub(0,3))
+              gameLevel.spawn('$', obj.gridPos.sub(0,4))
               destroy(obj)
               gameLevel.spawn('}', obj.gridPos.sub(0,0))
 
@@ -153,10 +177,20 @@ kaboom({
               destroy(obj)
               gameLevel.spawn('}', obj.gridPos.sub(0,0))
           }
+
+          if(obj.is('keys-surprise')) {
+              gameLevel.spawn('&', obj.gridPos.sub(0,4))
+              destroy(obj)
+              gameLevel.spawn('}', obj.gridPos.sub(0,0))
+          }
       })
 
       action('danger',(d) => {
           d.move(-20,0)
+      })
+
+      action('keys',(k) => {
+          k.move(30,0)
       })
 
       player.collides('pipe', () => {
@@ -170,13 +204,26 @@ kaboom({
 
       player.collides('mushroom', (m) => {
           destroy(m)
-          player.biggify(6)
+          player.biggify(20)
+      })
+
+      player.collides('keys', (k) => {
+          destroy(k)
+          player.biggify(20)
+          CURRENT_MOVE_SPEED = FAST_SPEED
       })
 
       player.collides('coin', (c) => {
           destroy(c)
           scoreLabel.value++
           scoreLabel.text = scoreLabel.value
+      })
+
+      player.collides('dollar', (d) => {
+          destroy(d)
+          scoreLabel.value++
+          scoreLabel.text = scoreLabel.value
+          CURRENT_MOVE_SPEED = MOVE_SPEED
       })
 
       player.collides('danger', (d) => {
@@ -195,10 +242,10 @@ kaboom({
       })
 
       keyDown('left', () => {
-          player.move(-MOVE_SPEED,0)
+          player.move(-CURRENT_MOVE_SPEED,0)
       })
       keyDown('right', () => {
-        player.move(MOVE_SPEED,0)
+        player.move(CURRENT_MOVE_SPEED,0)
     })
 
     player.action(() => {
