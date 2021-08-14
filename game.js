@@ -16,7 +16,7 @@ kaboom({
     const FALL_DEATH = 500
   
 
-  loadSprite('coin','https://i.imgur.com/fXaF7G7.png')
+  loadSprite('coin','https://i.imgur.com/faSWEi9.png')
   loadSprite('evil-shroom','https://i.imgur.com/hxtFpBg.png')
   loadSprite('brick','https://i.imgur.com/pogC9x5.png')
   loadSprite('block','https://i.imgur.com/M6rwarW.png')
@@ -30,7 +30,8 @@ kaboom({
   loadSprite('pipe-bottom-right','https://i.imgur.com/nqQ79eI.png')
   loadSprite('keys','https://i.imgur.com/h3MaVaL.png')
   loadSprite('dollar','https://i.imgur.com/TX1Rowr.png')
-
+  loadSprite('fossil','https://i.imgur.com/cTfnXug.png')
+  loadSprite('hodl','https://i.imgur.com/Is5hv8D.png')
 
   scene("game", ({level, score}) => {
       layers(['bg', 'obj', 'ui'], 'obj')
@@ -64,14 +65,49 @@ kaboom({
             '                     }  }  }                                                                                            ',
             '                  }  }  }  }                                                                                            ',
             '                  }  }  }  }                    ^         ^         ^           ^                                       ',
-            ' ======================================================================================                                 ',
+            ' ======================================================================================         ================        ',
             '                                                                                                                        ',
             '                                                                                                                        ',
             '                                                                                                                        ',
-            '                                                     ! ! !    !!!!!      !    !!!!!                                     ',
-            '                                                     ! ! !      !       !!!     !                                       ',
-            '                                                     !        !!!!!    !   !    !                                       ',
+            '                                                       ! ! !    !!!!!      !    !!!!!                                   ',
+            '  -+                                                   ! ! !      !       !!!     !                                     ',
+            '  ()                                                   !        !!!!!    !   !    !                                     ',
             ' ===================   =====   =====    =====     =========================================================             ',
+            '                                                                                                                        ',
+            '                                                                                                                        ',
+            '                                                                                                                        ',
+        ],
+        [
+            '                                                                                                                        ',
+            '                                         @                                                                              ',
+            '                                                                 ====================                                   ',
+            '                                                                                                                        ',
+            '                                                                                                                        ',
+            '=====  =====  =====  =====  =======================                                                                     ',
+            '                                                                                                                        ',
+            '                                                                                                                       ',
+            '                                                                                      $$$   $    $$$$$  $$$$   $$$  $   $  $$$$$                             ',
+            '                                                                                      $$   $$$     $    $  $   $$   $ $ $    $                               ',
+            '                                                                                     $$$  $   $    $    $$$$  $$$   $   $  $$$$$                             ',
+            '                                                                               =======================================================                       ',
+            '                                                                                                                                                                                              ',
+            '                                                                                                                                                                                              ',
+            '                                                                                                                                                                                        >     ',
+            '                                                                                                                                                                                              ',
+            '                                                                                                                                                       ?        ?         ?                         ',
+            '                                                                                                                                                                                                        ',
+            '                                                                                                                                 ===========================================================           ',
+            '                                                                                                                        ',
+            '                                                                                                                        ',
+            '                                                                                                                        ',
+            '                                                                                                                        ',
+            '                                                                                                                        ',
+            '                                                                                                                        ',
+            '                                                                                                                        ',
+            '                                                                                                                        ',
+            '                                                                                                                        ',
+            '                                                                                                                        ',
+            '                                                                                                                        ',
             '                                                                                                                        ',
             '                                                                                                                        ',
             '                                                                                                                        ',
@@ -82,7 +118,7 @@ kaboom({
           width: 20,
           height: 20,
           '=': [sprite('block'), solid()],
-          '$': [sprite('coin'), 'coin', scale(0.2)],
+          '$': [sprite('coin'), 'coin', scale(0.03)],
           '%': [sprite('surprise'), solid(), 'coin-surprise'],
           '*': [sprite('surprise'), solid(), 'mushroom-surprise'],
           '@': [sprite('surprise'), solid(), 'keys-surprise'],
@@ -93,15 +129,17 @@ kaboom({
           '+': [sprite('pipe-top-right'), solid(), scale(0.5), 'pipe'],
           '^': [sprite('evil-shroom'), solid(), 'danger', scale(0.5), body()],
           '#': [sprite('mushroom'),solid(), 'mushroom', body()],
-          '&': [sprite('keys'),solid(), 'keys', body(), scale(0.2)],
+          '&': [sprite('keys'),solid(), 'keys', body(), scale(0.1)],
           '!': [sprite('dollar'), solid(), 'dollar', scale(0.5)],
+          '?': [sprite('fossil'), solid(), 'fossil', scale(0.1)],
+          '>': [sprite('hodl'), solid(), 'hodl', scale(0.2)],
 
       }
 
       const gameLevel = addLevel(maps[level], levelCfg)
 
       const scoreLabel = add([
-          text('Score: ' + parseInt(score)),
+          text('Crypto Score: ' + parseInt(score)),
           pos(40,0),
           layer('ui'),
           {
@@ -115,11 +153,6 @@ kaboom({
           layer('ui')
       ])
 
-      add([
-          text('Rules: 1. You cannot Earn Bitcoins without the mining machine'),
-          pos(40,20),
-          layer('ui')
-      ])
 
       function big() {
           var timer = 0
@@ -202,6 +235,15 @@ kaboom({
           })
       })
 
+      player.collides('fossil', () => {
+        go('lose', { score: scoreLabel.value})
+        
+      })
+      player.collides('hodl', () => {
+        go('hold', { score: scoreLabel.value})
+        
+    })
+
       player.collides('mushroom', (m) => {
           destroy(m)
           player.biggify(20)
@@ -234,6 +276,7 @@ kaboom({
           }
       })
 
+
       player.action(() => {
           camPos(player.pos)
           if((player.pos.y) >= FALL_DEATH){
@@ -265,6 +308,14 @@ kaboom({
   scene('lose', ({ score }) => {
       add([
           text(score, 32),
+          origin('center'),
+          pos(width()/2, height()/2)
+      ])
+  })
+
+  scene('hold', ({ score }) => {
+      add([
+          text('CONGRATULATION! YOU ARE HODLER NOW'),
           origin('center'),
           pos(width()/2, height()/2)
       ])
